@@ -307,28 +307,42 @@ bool coapClient::loop() {
 
             String url = "";
             // call endpoint url function
-            for (int i = 0; i < packet.optionnum; i++) {
-                if (packet.options[i].number == COAP_URI_PATH && packet.options[i].length > 0) {
-                    char urlname[packet.options[i].length + 1];
-                    memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
-                    urlname[packet.options[i].length] = NULL;
-                    if(url.length() > 0)
-                      url += "/";
-                    url += urlname;
-                }
-            }
-            Serial.print("Url:");Serial.println(url);
+            // for (int i = 0; i < packet.optionnum; i++) {
+            //     if (packet.options[i].number == COAP_URI_PATH && packet.options[i].length > 0) {
+            //         char urlname[packet.options[i].length + 1];
+            //         memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
+            //         urlname[packet.options[i].length] = NULL;
+            //         if(url.length() > 0)
+            //           url += "/";
+            //         url += urlname;
+            //     }
+            // }
+            // Serial.print("Url:");Serial.println(url);
+			// url = "";
+            // // call endpoint url function
+            // for (int i = 0; i < packet.optionnum; i++) {
+            //     if (packet.options[i].number == COAP_LOCATION_PATH && packet.options[i].length > 0) {
+            //         char urlname[packet.options[i].length + 1];
+            //         memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
+            //         urlname[packet.options[i].length] = NULL;
+            //         if(url.length() > 0)
+            //           url += "/";
+            //         url += urlname;
+            //     }
+            // }
+            // Serial.print("Url:");Serial.println(url);
 			url = "";
             // call endpoint url function
             for (int i = 0; i < packet.optionnum; i++) {
-                if (packet.options[i].number == COAP_LOCATION_PATH && packet.options[i].length > 0) {
+                
+					Serial.print("number");Serial.println(packet.options[i].number);
                     char urlname[packet.options[i].length + 1];
                     memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
                     urlname[packet.options[i].length] = NULL;
                     if(url.length() > 0)
                       url += "/";
                     url += urlname;
-                }
+                
             }
             Serial.print("Url:");Serial.println(url);
         
