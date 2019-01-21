@@ -227,7 +227,7 @@ bool coapClient::loop() {
 
 	uint8_t buffer[BUF_MAX_SIZE];
 	int32_t packetlen = udp.parsePacket();
-	
+
 	while (packetlen > 0) {
 		packetlen = udp.read(buffer, packetlen >= BUF_MAX_SIZE ? BUF_MAX_SIZE : packetlen);
 		coapPacket packet;
@@ -250,7 +250,7 @@ bool coapClient::loop() {
 			continue;
 		}
 
-		// parse packet options/payload
+		// // parse packet options/payload
 		// if (COAP_HEADER_SIZE + packet.tokenlen < packetlen) {
 		// 	int optionIndex = 0;
 		// 	uint16_t delta = 0;
@@ -261,7 +261,6 @@ bool coapClient::loop() {
 		// 	while(optionIndex < MAX_OPTION_NUM && *p != 0xFF && p < end) {
 		// 		packet.options[optionIndex];
 		// 		if (0 != parseOption(&packet.options[optionIndex], &delta, &p, end-p)){
-		// 			Serial.println("Loop False");
 		// 			return false;
 		// 		}
 		// 		optionIndex++;
@@ -291,65 +290,19 @@ bool coapClient::loop() {
             }
             packet.optionnum = optionIndex;
 
-            if (p+1 < end && *p == 0xFF) {
-                packet.payload = p+1;
-                packet.payloadlen = end-(p+1);
+            if (p+4 < end && *p == 0xFF) {
+                packet.payload = p+4;
+                packet.payloadlen = end-(p+4);
             } else {
-                // packet.payload = NULL;
-                // packet.payloadlen= 0;
+                packet.payload = NULL;
+                packet.payloadlen= 0;
             }
         }
 
-		if (packet.type == COAP_ACK || packet.type ==  COAP_RESET) {
-			// call response function
-			resp(packet, udp.remoteIP(), udp.remotePort());
-		}
-
-            String url = "";
-            // call endpoint url function
-            // for (int i = 0; i < packet.optionnum; i++) {
-            //     if (packet.options[i].number == COAP_URI_PATH && packet.options[i].length > 0) {
-            //         char urlname[packet.options[i].length + 1];
-            //         memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
-            //         urlname[packet.options[i].length] = NULL;
-            //         if(url.length() > 0)
-            //           url += "/";
-            //         url += urlname;
-            //     }
-            // }
-            // Serial.print("Url:");Serial.println(url);
-			// url = "";
-            // // call endpoint url function
-            // for (int i = 0; i < packet.optionnum; i++) {
-            //     if (packet.options[i].number == COAP_LOCATION_PATH && packet.options[i].length > 0) {
-            //         char urlname[packet.options[i].length + 1];
-            //         memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
-            //         urlname[packet.options[i].length] = NULL;
-            //         if(url.length() > 0)
-            //           url += "/";
-            //         url += urlname;
-            //     }
-            // }
-            // Serial.print("Url:");Serial.println(url);
-			url = "";
-            // call endpoint url function
-            for (int i = 0; i < packet.optionnum; i++) {
-                
-					Serial.print("number");Serial.println(packet.options[i].number);
-                    char urlname[packet.options[i].length + 1];
-                    memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
-                    urlname[packet.options[i].length] = NULL;
-                    if(url.length() > 0)
-                      url += "/";
-                    url += urlname;
-                
-            }
-            Serial.print("Url:");Serial.println(url);
-        
-		Serial.println("Loop true");
+		resp(packet, udp.remoteIP(), udp.remotePort());
 		return true;
 	}
-
+	return false;
 }
 
 //parse option

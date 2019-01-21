@@ -85,7 +85,7 @@ class coapPacket {
 		coapOption options[MAX_OPTION_NUM];
 };
 
-typedef void (*callback)(coapPacket &, IPAddress, int);
+typedef void (*callback)(coapPacket , IPAddress, int);
 
 
 class coapClient{
