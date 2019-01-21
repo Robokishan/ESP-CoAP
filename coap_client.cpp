@@ -38,12 +38,13 @@ uint16_t coapClient::put(IPAddress ip, int port, char *url, char *payload, int p
 uint16_t coapClient::post(IPAddress ip, int port, char *url, char *payload, int payloadlen) {
 	send(ip, port, url, COAP_CON, COAP_POST, NULL, 0, (uint8_t *)payload, payloadlen,0,NULL);
 }
+uint16_t coapClient::post(IPAddress ip, int port, char *url, char *payload, int payloadlen,uint8_t number[],String uri[]) {
+	Lwm2msend(ip, port, url, COAP_CON, COAP_POST, NULL, 0, (uint8_t *)payload, payloadlen,number,uri);
+}
 
 //delete request
 uint16_t coapClient::delet(IPAddress ip, int port, char *url){
 	send(ip, port, url, COAP_CON, COAP_DELETE, NULL, 0, NULL, 0,0,NULL);
-
-
 }
 
 //ping
@@ -95,6 +96,43 @@ uint16_t coapClient::send(IPAddress ip, int port, char *url, COAP_TYPE type, COA
 		packet.options[packet.optionnum].length = strlen(url);
 		packet.options[packet.optionnum].number = COAP_URI_PATH;
 		packet.optionnum++;
+	}
+	// send packet
+	sendPacket(packet, ip, port);
+}
+
+uint16_t coapClient::Lwm2msend(IPAddress ip, int port, char *url, COAP_TYPE type, COAP_METHOD method, uint8_t *token, uint8_t tokenlen, uint8_t *payload, uint32_t payloadlen,uint8_t number[],String uri[]) {
+
+	coapPacket packet;
+
+	//make packet
+	packet.type = type;
+	packet.code = method;
+	packet.token = token;
+	packet.tokenlen = tokenlen;
+	packet.payload = payload;
+	packet.payloadlen = payloadlen;
+	packet.optionnum = 0;
+	packet.messageid = rand();
+
+	
+
+	if(method!=COAP_EMPTY){
+
+		// options
+		packet.options[packet.optionnum].buffer = (uint8_t *)url;
+		packet.options[packet.optionnum].length = strlen(url);
+		packet.options[packet.optionnum].number = COAP_URI_PATH;
+		packet.optionnum++;
+	}
+	for(int i=0; i<sizeof(number);i++)
+	{
+		if(number[i] == 15){
+			packet.options[packet.optionnum].buffer = (uint8_t *)uri[i].c_str();
+			packet.options[packet.optionnum].length = uri[i].length();
+			packet.options[packet.optionnum].number = number[i];
+			packet.optionnum++;
+		}
 	}
 	// send packet
 	sendPacket(packet, ip, port);
@@ -189,10 +227,9 @@ bool coapClient::loop() {
 
 	uint8_t buffer[BUF_MAX_SIZE];
 	int32_t packetlen = udp.parsePacket();
-
+	
 	while (packetlen > 0) {
 		packetlen = udp.read(buffer, packetlen >= BUF_MAX_SIZE ? BUF_MAX_SIZE : packetlen);
-
 		coapPacket packet;
 
 		// parse coap packet header
@@ -200,7 +237,6 @@ bool coapClient::loop() {
 			packetlen = udp.parsePacket();
 			continue;
 		}
-
 		packet.type = (buffer[0] & 0x30) >> 4;
 		packet.tokenlen = buffer[0] & 0x0F;
 		packet.code = buffer[1];
@@ -220,6 +256,8 @@ bool coapClient::loop() {
 			uint16_t delta = 0;
 			uint8_t *end = buffer + packetlen;
 			uint8_t *p = buffer + COAP_HEADER_SIZE + packet.tokenlen;
+			char power_buffer[250];
+			memcpy(power_buffer, p,250);
 			while(optionIndex < MAX_OPTION_NUM && *p != 0xFF && p < end) {
 				packet.options[optionIndex];
 				if (0 != parseOption(&packet.options[optionIndex], &delta, &p, end-p))
@@ -232,8 +270,8 @@ bool coapClient::loop() {
 				packet.payload = p+1;
 				packet.payloadlen = end-(p+1);
 			} else {
-				packet.payload = NULL;
-				packet.payloadlen= 0;
+				// packet.payload = NULL;
+				// packet.payloadlen= 0;
 			}
 		}
 

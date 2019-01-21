@@ -97,11 +97,14 @@ class coapClient{
 		uint16_t get(IPAddress ip, int port, char *url);
 		uint16_t put(IPAddress ip, int port, char *url, char *payload,int payloadlen);
 		uint16_t post(IPAddress ip, int port, char *url, char *payload,int payloadlen);
+		uint16_t post(IPAddress ip, int port, char *url, char *payload,int payloadlen,uint8_t number[],String uri[]);
+		
 		uint16_t delet(IPAddress ip, int port, char *url);
 		uint16_t ping(IPAddress ip, int port);
 		uint16_t observe(IPAddress ip,int port,char *url,uint8_t observe); 
 
 		uint16_t send(IPAddress ip, int port, char *url, COAP_TYPE type, COAP_METHOD method, uint8_t *token, uint8_t tokenlen, uint8_t *payload, uint32_t payloadlen,uint8_t number,uint8_t buffer);
+		uint16_t Lwm2msend(IPAddress ip, int port, char *url, COAP_TYPE type, COAP_METHOD method, uint8_t *token, uint8_t tokenlen, uint8_t *payload, uint32_t payloadlen,uint8_t number[],String uri[]);
 
 		uint16_t sendPacket(coapPacket &packet, IPAddress ip, int port);
 
