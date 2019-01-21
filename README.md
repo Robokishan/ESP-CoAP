@@ -1,3 +1,5 @@
+# for this library consider example from https://github.com/Robokishan/esplwm2m
+
 # thingTronics ESP8266 12E Arduino Library
 This is a Arduino Library for the ESP8266 12E.
 
