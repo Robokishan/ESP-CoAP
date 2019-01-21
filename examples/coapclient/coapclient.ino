@@ -99,7 +99,7 @@ void loop() {
     
     // int msgid=coap.observe(ip,port,"obs",0);
   
-    state= coap.loop();
+    state = coap.loop();
     // Serial.print("state=");
     //Serial.println(state);
     //if(state==true)

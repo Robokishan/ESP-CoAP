@@ -251,36 +251,88 @@ bool coapClient::loop() {
 		}
 
 		// parse packet options/payload
-		if (COAP_HEADER_SIZE + packet.tokenlen < packetlen) {
-			int optionIndex = 0;
-			uint16_t delta = 0;
-			uint8_t *end = buffer + packetlen;
-			uint8_t *p = buffer + COAP_HEADER_SIZE + packet.tokenlen;
-			char power_buffer[250];
-			memcpy(power_buffer, p,250);
-			while(optionIndex < MAX_OPTION_NUM && *p != 0xFF && p < end) {
-				packet.options[optionIndex];
-				if (0 != parseOption(&packet.options[optionIndex], &delta, &p, end-p))
-					return false;
-				optionIndex++;
-			}
-			packet.optionnum = optionIndex;
+		// if (COAP_HEADER_SIZE + packet.tokenlen < packetlen) {
+		// 	int optionIndex = 0;
+		// 	uint16_t delta = 0;
+		// 	uint8_t *end = buffer + packetlen;
+		// 	uint8_t *p = buffer + COAP_HEADER_SIZE + packet.tokenlen;
+		// 	char power_buffer[250];
+		// 	memcpy(power_buffer, p,250);
+		// 	while(optionIndex < MAX_OPTION_NUM && *p != 0xFF && p < end) {
+		// 		packet.options[optionIndex];
+		// 		if (0 != parseOption(&packet.options[optionIndex], &delta, &p, end-p)){
+		// 			Serial.println("Loop False");
+		// 			return false;
+		// 		}
+		// 		optionIndex++;
+		// 	}
+		// 	packet.optionnum = optionIndex;
 
-			if (p+1 < end && *p == 0xFF) {
-				packet.payload = p+1;
-				packet.payloadlen = end-(p+1);
-			} else {
-				// packet.payload = NULL;
-				// packet.payloadlen= 0;
-			}
-		}
+		// 	if (p+1 < end && *p == 0xFF) {
+		// 		packet.payload = p+1;
+		// 		packet.payloadlen = end-(p+1);
+		// 	} else {
+		// 		// packet.payload = NULL;
+		// 		// packet.payloadlen= 0;
+		// 	}
+		// }
+
+		// parse packet options/payload
+        if (COAP_HEADER_SIZE + packet.tokenlen < packetlen) {
+            int optionIndex = 0;
+            uint16_t delta = 0;
+            uint8_t *end = buffer + packetlen;
+            uint8_t *p = buffer + COAP_HEADER_SIZE + packet.tokenlen;
+            while(optionIndex < MAX_OPTION_NUM && *p != 0xFF && p < end) {
+                packet.options[optionIndex];
+                if (0 != parseOption(&packet.options[optionIndex], &delta, &p, end-p))
+                    return false;
+                optionIndex++;
+            }
+            packet.optionnum = optionIndex;
+
+            if (p+1 < end && *p == 0xFF) {
+                packet.payload = p+1;
+                packet.payloadlen = end-(p+1);
+            } else {
+                // packet.payload = NULL;
+                // packet.payloadlen= 0;
+            }
+        }
 
 		if (packet.type == COAP_ACK || packet.type ==  COAP_RESET) {
 			// call response function
 			resp(packet, udp.remoteIP(), udp.remotePort());
+		}
 
-		} 
-
+            String url = "";
+            // call endpoint url function
+            for (int i = 0; i < packet.optionnum; i++) {
+                if (packet.options[i].number == COAP_URI_PATH && packet.options[i].length > 0) {
+                    char urlname[packet.options[i].length + 1];
+                    memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
+                    urlname[packet.options[i].length] = NULL;
+                    if(url.length() > 0)
+                      url += "/";
+                    url += urlname;
+                }
+            }
+            Serial.print("Url:");Serial.println(url);
+			url = "";
+            // call endpoint url function
+            for (int i = 0; i < packet.optionnum; i++) {
+                if (packet.options[i].number == COAP_LOCATION_PATH && packet.options[i].length > 0) {
+                    char urlname[packet.options[i].length + 1];
+                    memcpy(urlname, packet.options[i].buffer, packet.options[i].length);
+                    urlname[packet.options[i].length] = NULL;
+                    if(url.length() > 0)
+                      url += "/";
+                    url += urlname;
+                }
+            }
+            Serial.print("Url:");Serial.println(url);
+        
+		Serial.println("Loop true");
 		return true;
 	}
 
